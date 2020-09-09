@@ -43,7 +43,7 @@ ota_modules = ['ota_updater']  # Add your own application module to this list.
 def load_wifi_config():
     """Load Wifi Configuration from JSON file."""
     wifi_config = None
-    config_filename = 'wifi_cfg.json'
+    config_filename = 'config/wifi_cfg.json'
     try:
         with open(config_filename) as json_config_file:
             wifi_config = json.load(json_config_file)
@@ -51,12 +51,11 @@ def load_wifi_config():
         pass
 
     return wifi_config
-
-
+	
 def load_ota_config(module_name):
     """Load OTA Configuration from JSON file."""
     ota_config = None
-    config_filename = module_name + '/' + module_name + '_gitrepos_cfg.json'
+    config_filename = 'config/' + module_name + '_gitrepo_cfg.json'
     try:
         with open(config_filename) as json_config_file:
             ota_config = json.load(json_config_file)
@@ -64,8 +63,7 @@ def load_ota_config(module_name):
         pass
 
     return ota_config
-
-
+    
 def download_and_install_updates_if_available():
     # Wifi Configuration
     wifi_cfg = load_wifi_config()
@@ -75,7 +73,10 @@ def download_and_install_updates_if_available():
         return False
 
     # Open Wifi
-    OTAUpdater.using_network(wifi_cfg['wifi']['ssid'], wifi_cfg['wifi']['password'])
+    if not OTAUpdater.using_network(wifi_cfg['wifi']['ssid'], wifi_cfg['wifi']['password']):
+        # Failed to connect
+        print("Unable to connect to wifi")
+        return False
 
     # Startup Load Configuration For Each Module and check for updates, download if available, then overwrite main/
     for ota_module in ota_modules:
