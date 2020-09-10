@@ -6,3 +6,16 @@
 # /main/example_module/**
 # Except the .gitkeep to recreate the 'empty' directory.
 # !/main/example_module/.gitkeep
+
+
+# nm3_modem Module
+# Ignore contents of submodule directory  
+/main/nm3_modem/**
+# Except the .gitkeep to recreate the 'empty' directory.
+!/main/nm3_modem/.gitkeep
+
+# pybd_expansion Module
+# Ignore contents of submodule directory  
+/main/pybd_expansion/**
+# Except the .gitkeep to recreate the 'empty' directory.
+!/main/pybd_expansion/.gitkeep
