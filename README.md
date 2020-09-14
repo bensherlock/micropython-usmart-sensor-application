@@ -19,10 +19,10 @@ For information on the OTA Updater including how to use it in an example applica
 ## Modules
 
 This application will OTA update modules from the following repositories:
-+ [micropython-ota-updater](https://github.com/bensherlock/micropython-ota-updater)
-+ [micropython-usmart-sensor-mainloop](https://github.com/bensherlock/micropython-usmart-sensor-mainloop)
-+ [micropython-pybd-expansion](https://github.com/bensherlock/micropython-pybd-expansion)
-+ [micropython-unm3-pybd](https://github.com/bensherlock/micropython-unm3-pybd)
-+ network
-+ localisation
-+ sleep
++ ota_updater: [micropython-ota-updater](https://github.com/bensherlock/micropython-ota-updater)
++ mainloop: [micropython-usmart-sensor-mainloop](https://github.com/bensherlock/micropython-usmart-sensor-mainloop)
++ pybd_expansion: [micropython-pybd-expansion](https://github.com/bensherlock/micropython-pybd-expansion)
++ uac_modem: [micropython-unm3-pybd](https://github.com/bensherlock/micropython-unm3-pybd)
++ uac_network:
++ uac_localisation:
++ sleep:
