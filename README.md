@@ -3,6 +3,8 @@ USMART Sensor Node Application
 
 Top level application for the sensor nodes using PYBD and the expansion PCB. 
 
+Everything below this level, modules and the mainloop can be updated OTA in the field. 
+
  
 ## Usage
 
