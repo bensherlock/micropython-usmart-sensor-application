@@ -15,3 +15,14 @@ Create a wifi_cfg.json file using the template as an example and populate with a
 On POR (Power On Reset) the program will attempt to connect to the wifi and then check GitHub for the latest release versions of the modules (ota_updater etc) and then download them before rebooting the device. After running you should now see these modules updated.
 
 For information on the OTA Updater including how to use it in an example application  see [github.com/bensherlock/micropython-ota-updater](https://github.com/bensherlock/micropython-ota-updater).
+
+## Modules
+
+This application will OTA update modules from the following repositories:
++ [micropython-ota-updater](https://github.com/bensherlock/micropython-ota-updater)
++ [micropython-usmart-sensor-mainloop](https://github.com/bensherlock/micropython-usmart-sensor-mainloop)
++ [micropython-pybd-expansion](https://github.com/bensherlock/micropython-pybd-expansion)
++ [micropython-unm3-pybd](https://github.com/bensherlock/micropython-unm3-pybd)
++ network
++ localisation
++ sleep
