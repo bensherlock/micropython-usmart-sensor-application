@@ -106,6 +106,8 @@ def start():
     # Run the application.
     # This could be your own application included as part of your own module:
     # yourapp.main()
+    # import mainloop.main.mainloop as ml
+    # ml.run_mainloop()
     pass
 
 
