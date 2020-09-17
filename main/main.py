@@ -83,7 +83,7 @@ def download_and_install_updates_if_available():
         print("ota_module=" + ota_module)
         ota_cfg = load_ota_config(ota_module)
         if ota_cfg:
-            o = OTAUpdater(ota_cfg['gitrepos']['url'], ota_module)
+            o = OTAUpdater(ota_cfg['gitrepo']['url'], ota_module)
             # download_updates_if_available - Checks version numbers and downloads into next/
             o.download_updates_if_available()
             # apply_pending_updates_if_available - Moves next/ into main/
