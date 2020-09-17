@@ -21,6 +21,10 @@
 /main/pybd_expansion/**
 !/main/pybd_expansion/.gitkeep
 
+# sensor_payload Module
+/main/sensor_payload/**
+!/main/sensor_payload/.gitkeep
+
 # uac_localisation Module
 /main/uac_localisation/**
 !/main/uac_localisation/.gitkeep

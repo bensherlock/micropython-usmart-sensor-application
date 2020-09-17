@@ -38,7 +38,8 @@ import machine
 from ota_updater.main.ota_updater import OTAUpdater
 
 # Add your own ota updateable application modules to this list.
-ota_modules = ['mainloop,', 'ota_updater', 'pybd_expansion', 'uac_localisation', 'uac_modem', 'uac_network']  
+ota_modules = ['mainloop,', 'ota_updater', 'pybd_expansion', 'sensor_payload', 'uac_localisation', 'uac_modem',
+               'uac_network']
 
 
 def load_wifi_config():
