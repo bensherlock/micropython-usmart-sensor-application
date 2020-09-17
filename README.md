@@ -23,6 +23,6 @@ This application will OTA update modules from the following repositories:
 + mainloop: [micropython-usmart-sensor-mainloop](https://github.com/bensherlock/micropython-usmart-sensor-mainloop)
 + pybd_expansion: [micropython-pybd-expansion](https://github.com/bensherlock/micropython-pybd-expansion)
 + uac_modem: [micropython-unm3-pybd](https://github.com/bensherlock/micropython-unm3-pybd)
-+ uac_network:
-+ uac_localisation:
++ uac_network: [micropython-usmart-network](https://github.com/bensherlock/micropython-usmart-network)
++ uac_localisation: [micropython-usmart-localisation](https://github.com/bensherlock/micropython-usmart-localisation)
 + sleep:

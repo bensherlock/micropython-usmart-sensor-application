@@ -37,7 +37,8 @@ import pyb
 import machine
 from ota_updater.main.ota_updater import OTAUpdater
 
-ota_modules = ['ota_updater']  # Add your own application module to this list.
+# Add your own ota updateable application modules to this list.
+ota_modules = ['mainloop,', 'ota_updater', 'pybd_expansion', 'uac_localisation', 'uac_modem', 'uac_network']  
 
 
 def load_wifi_config():
@@ -103,11 +104,13 @@ def boot():
 
 
 def start():
-    # Run the application.
-    # This could be your own application included as part of your own module:
-    # yourapp.main()
-    # import mainloop.main.mainloop as ml
-    # ml.run_mainloop()
+    # Run the application from the MainLoop.
+    try:
+        import mainloop.main.mainloop as ml
+        ml.run_mainloop()
+    except:
+        pass
+
     pass
 
 

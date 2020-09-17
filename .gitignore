@@ -7,15 +7,29 @@
 # Except the .gitkeep to recreate the 'empty' directory.
 # !/main/example_module/.gitkeep
 
+# The ota_updater needs to be captured by git such that there is a starting updater available.
 
-# nm3_modem Module
-# Ignore contents of submodule directory  
-/main/nm3_modem/**
+# Submodules
+# Ignore contents of submodule directory
 # Except the .gitkeep to recreate the 'empty' directory.
-!/main/nm3_modem/.gitkeep
+
+# mainloop Module
+/main/mainloop/**
+!/main/mainloop/.gitkeep
 
 # pybd_expansion Module
-# Ignore contents of submodule directory  
 /main/pybd_expansion/**
-# Except the .gitkeep to recreate the 'empty' directory.
 !/main/pybd_expansion/.gitkeep
+
+# uac_localisation Module
+/main/uac_localisation/**
+!/main/uac_localisation/.gitkeep
+
+# uac_modem Module
+/main/uac_modem/**
+!/main/uac_modem/.gitkeep
+
+# uac_network Module
+/main/uac_network/**
+!/main/uac_network/.gitkeep
+
