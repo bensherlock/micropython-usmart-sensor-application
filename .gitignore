@@ -1,6 +1,9 @@
 # Ignore the wifi config details
 /main/config/wifi_cfg.json
 
+# Ignore the deploy folder and contents
+/deploy
+
 # Example Module
 # Ignore contents of submodule directory  
 # /main/example_module/**
