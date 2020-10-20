@@ -97,8 +97,9 @@ def download_and_install_updates_if_available():
 
 def boot():
     # Check reason for reset - only update if power on reset
-    if machine.reset_cause() == machine.PWRON_RESET:
-        download_and_install_updates_if_available()
+    #if machine.reset_cause() == machine.PWRON_RESET:
+    #    download_and_install_updates_if_available()
+    # Disable the OTA update for during development
 
     # Start the main application
     start()
