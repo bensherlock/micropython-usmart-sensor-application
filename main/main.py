@@ -30,12 +30,14 @@
 #
 """MicroPython USMART Sensor Application."""
 
-#import network
+# import network
 import json
 import os
 import pyb
 import machine
+import utime
 from ota_updater.main.ota_updater import OTAUpdater
+import jotter
 
 # Add your own ota updateable application modules to this list.
 ota_modules = ['mainloop,', 'ota_updater', 'pybd_expansion', 'sensor_payload', 'uac_localisation', 'uac_modem',
@@ -53,7 +55,8 @@ def load_wifi_config():
         pass
 
     return wifi_config
-	
+
+
 def load_ota_config(module_name):
     """Load OTA Configuration from JSON file."""
     ota_config = None
@@ -65,7 +68,8 @@ def load_ota_config(module_name):
         pass
 
     return ota_config
-    
+
+
 def download_and_install_updates_if_available():
     # Wifi Configuration
     wifi_cfg = load_wifi_config()
@@ -89,17 +93,17 @@ def download_and_install_updates_if_available():
             # download_updates_if_available - Checks version numbers and downloads into next/
             o.download_updates_if_available()
             # apply_pending_updates_if_available - Moves next/ into main/
-            o.apply_pending_updates_if_available()            
+            o.apply_pending_updates_if_available()
 
-    # Now need to reboot to make use of the updated modules
+            # Now need to reboot to make use of the updated modules
     machine.reset()
 
 
 def boot():
     # Check reason for reset - only update if power on reset
-    #if machine.reset_cause() == machine.PWRON_RESET:
-    #    download_and_install_updates_if_available()
-    # Disable the OTA update for during development
+    if machine.reset_cause() == machine.PWRON_RESET:
+        download_and_install_updates_if_available()
+
 
     # Start the main application
     start()
@@ -107,11 +111,47 @@ def boot():
 
 def start():
     # Run the application from the MainLoop.
+    # jotter.get_jotter().jot("start()", source_file=__name__)
+
+    # Red and Green LEDs on during the startup wait period
+    pyb.LED(1).on()
+    pyb.LED(2).on()
+
+    # Debug Modes
+    # https://forum.micropython.org/viewtopic.php?t=6222
+    # Check if USB cable is plugged in to a PC. If so, then we may want to wait a period before launching the program.
+    # If you want to detect if the USB is plugged in to a PC and enumerated, but may or may not have a serial terminal
+    # connection, then inspect the registers directly:
+    usb_cable_connected = False
+    USB_HS = 0x40040000
+    USB_FS = 0x50000000
+    if machine.mem32[USB_HS] & (1 << 19):  # check BSVLD bit
+        # have USB HS connection
+        usb_cable_connected = True
+    if machine.mem32[USB_FS] & (1 << 19):  # check BSVLD bit
+        # have USB FS connection
+        usb_cable_connected = True
+
+    # The above seems to happen even if the USB cable isn't connected to a PC?
+
+    timeout_start = utime.time()
+    if usb_cable_connected:
+        while utime.time() < timeout_start + 30:
+            utime.sleep_ms(100)
+
+    # Red and Green LEDs off after the startup wait period
+    pyb.LED(1).off()
+    pyb.LED(2).off()
+
+    # Now run the mainloop
     try:
         import mainloop.main.mainloop as ml
+        jotter.get_jotter().jot("start()::run_mainloop()", source_file=__name__)
         ml.run_mainloop()
-    except:
+    except Exception as the_exception:
+        jotter.get_jotter().jot_exception(the_exception)
         pass
+        # Log to file
 
     pass
 

@@ -34,3 +34,10 @@ git init .
 git remote add origin https://github.com/bensherlock/micropython-unm3-pybd.git
 git pull origin master
 cd ../..
+
+# uac_network
+cd main/uac_network
+git init .
+git remote add origin https://github.com/bensherlock/micropython-usmart-network.git
+git pull origin master
+cd ../..
