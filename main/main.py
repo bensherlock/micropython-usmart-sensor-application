@@ -95,7 +95,7 @@ def download_and_install_updates_if_available():
             # apply_pending_updates_if_available - Moves next/ into main/
             o.apply_pending_updates_if_available()
 
-            # Now need to reboot to make use of the updated modules
+    # Now need to reboot to make use of the updated modules
     machine.reset()
 
 
@@ -103,6 +103,22 @@ def boot():
     # Check reason for reset - only update if power on reset
     # if machine.reset_cause() == machine.PWRON_RESET:
     #    download_and_install_updates_if_available()  # commented out during development
+
+    try:
+        # Check for the flag file .USOTA
+        if '.USOTA' in os.listdir():
+            # Then update is required
+            # Remove the file first
+            os.remove('.USOTA')
+            download_and_install_updates_if_available()
+
+    except Exception as the_exception:
+        jotter.get_jotter().jot_exception(the_exception)
+
+        import sys
+        sys.print_exception(the_exception)
+        pass
+        # Log to file
 
     # Start the main application
     start()
