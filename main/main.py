@@ -40,7 +40,7 @@ from ota_updater.main.ota_updater import OTAUpdater
 import jotter
 
 # Add your own ota updateable application modules to this list.
-ota_modules = ['mainloop,', 'ota_updater', 'pybd_expansion', 'sensor_payload', 'uac_localisation', 'uac_modem',
+ota_modules = ['mainloop', 'ota_updater', 'pybd_expansion', 'sensor_payload', 'uac_localisation', 'uac_modem',
                'uac_network']
 
 
