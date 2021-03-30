@@ -71,39 +71,70 @@ def load_ota_config(module_name):
 
 
 def download_and_install_updates_if_available():
-    # Wifi Configuration
-    wifi_cfg = load_wifi_config()
-    if not wifi_cfg:
-        # No wifi configuration
-        print('No wifi config info')
-        return False
+    """Connects to WiFi and checks for all modules for updates. This function will always cause a machine reset. """
+    try:
+        # Need to start the WDT during this. And to finish with the reset.
+        import machine
+        # Firstly Initialise the Watchdog machine.WDT. This cannot now be stopped and *must* be fed.
+        wdt = machine.WDT(timeout=30000)  # 30 seconds timeout on the watchdog.
 
-    # Open Wifi
-    if not OTAUpdater.using_network(wifi_cfg['wifi']['ssid'], wifi_cfg['wifi']['password']):
-        # Failed to connect
-        print("Unable to connect to wifi")
-        return False
+        # Feed the watchdog
+        wdt.feed()
 
-    # Startup Load Configuration For Each Module and check for updates, download if available, then overwrite main/
-    for ota_module in ota_modules:
-        print("ota_module=" + ota_module)
-        ota_cfg = load_ota_config(ota_module)
-        if ota_cfg:
-            o = OTAUpdater(ota_cfg['gitrepo']['url'], ota_module)
-            # download_updates_if_available - Checks version numbers and downloads into next/
-            o.download_updates_if_available()
-            # apply_pending_updates_if_available - Moves next/ into main/
-            o.apply_pending_updates_if_available()
+        # Wifi Configuration
+        wifi_cfg = load_wifi_config()
+        if not wifi_cfg:
+            # No wifi configuration
+            print('No wifi config info')
+            raise Exception("No wifi config info")
 
-    # Now need to reboot to make use of the updated modules
-    machine.reset()
+        # Feed the watchdog
+        wdt.feed()
+
+        # Open Wifi
+        if not OTAUpdater.using_network(wifi_cfg['wifi']['ssid'], wifi_cfg['wifi']['password']):
+            # Failed to connect
+            print("Unable to connect to wifi")
+            raise Exception("Unable to connect to wifi")
+
+        # Feed the watchdog
+        wdt.feed()
+
+        # Startup Load Configuration For Each Module and check for updates, download if available, then overwrite main/
+        for ota_module in ota_modules:
+            # Feed the watchdog
+            wdt.feed()
+
+            print("ota_module=" + ota_module)
+            ota_cfg = load_ota_config(ota_module)
+            if ota_cfg:
+                o = OTAUpdater(ota_cfg['gitrepo']['url'], ota_module)
+                # download_updates_if_available - Checks version numbers and downloads into next/
+                o.download_updates_if_available()
+                # apply_pending_updates_if_available - Moves next/ into main/
+                o.apply_pending_updates_if_available()
+
+    except Exception:
+        pass
+
+    finally:
+        # Now need to reboot to make use of the updated modules
+        machine.reset()
 
 
 def boot():
-    # Check reason for reset - only update if power on reset
-    # if machine.reset_cause() == machine.PWRON_RESET:
-    #    download_and_install_updates_if_available()  # commented out during development
+    # Check reason for reset - only update if power on reset. For now we only want to do OTA if requested.
+    # try:
+    #     if machine.reset_cause() == machine.PWRON_RESET:
+    #         download_and_install_updates_if_available()  # commented out during development
+    # except Exception as the_exception:
+    #     jotter.get_jotter().jot_exception(the_exception)
+    #     import sys
+    #     sys.print_exception(the_exception)
+    #     pass
+    #     # Log to file
 
+    # Manual OTA request
     try:
         # Check for the flag file .USOTA
         if '.USOTA' in os.listdir():
@@ -121,42 +152,37 @@ def boot():
         # Log to file
 
     # Start the main application
-    start()
+    try:
+        start()
+    finally:
+        # If we return from start() then things have crashed so reset the device.
+        machine.reset()
 
 
 def start():
     # Run the application from the MainLoop.
-    # jotter.get_jotter().jot("start()", source_file=__name__)
+    try:
+        # jotter.get_jotter().jot("start()", source_file=__name__)
+        # Red and Green LEDs on during the startup wait period
+        pyb.LED(1).on()
+        pyb.LED(2).on()
 
-    # Red and Green LEDs on during the startup wait period
-    pyb.LED(1).on()
-    pyb.LED(2).on()
-
-    # Debug Modes
-    # https://forum.micropython.org/viewtopic.php?t=6222
-    # Check if USB cable is plugged in to a PC. If so, then we may want to wait a period before launching the program.
-    # If you want to detect if the USB is plugged in to a PC and enumerated, but may or may not have a serial terminal
-    # connection, then inspect the registers directly:
-    usb_cable_connected = False
-    USB_HS = 0x40040000
-    USB_FS = 0x50000000
-    if machine.mem32[USB_HS] & (1 << 19):  # check BSVLD bit
-        # have USB HS connection
-        usb_cable_connected = True
-    if machine.mem32[USB_FS] & (1 << 19):  # check BSVLD bit
-        # have USB FS connection
-        usb_cable_connected = True
-
-    # The above seems to happen even if the USB cable isn't connected to a PC?
-
-    timeout_start = utime.time()
-    if usb_cable_connected:
+        # 30 second delay at the start to connect via REPL and kill the program before it fires up the WDT.
+        timeout_start = utime.time()
         while utime.time() < timeout_start + 30:
             utime.sleep_ms(100)
 
-    # Red and Green LEDs off after the startup wait period
-    pyb.LED(1).off()
-    pyb.LED(2).off()
+        # Red and Green LEDs off after the startup wait period
+        pyb.LED(1).off()
+        pyb.LED(2).off()
+
+    except Exception as the_exception:
+        jotter.get_jotter().jot_exception(the_exception)
+
+        import sys
+        sys.print_exception(the_exception)
+        pass
+        # Log to file
 
     # Now run the mainloop
     try:
