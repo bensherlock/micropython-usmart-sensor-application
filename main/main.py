@@ -70,6 +70,29 @@ def load_ota_config(module_name):
     return ota_config
 
 
+def get_installed_module_versions():
+    """Get the version of each of the installed modules.
+    Returns a dictionary of module to version pairs"""
+    mod_version_dictionary = {}
+
+    try:
+        # Startup Load Configuration For Each Module and get version
+        for ota_module in ota_modules:
+            if ota_module:
+                print("ota_module=" + ota_module)
+                ota_cfg = load_ota_config(ota_module)
+                if ota_cfg:
+                    o = OTAUpdater(ota_cfg['gitrepo']['url'], ota_module)
+                    v = o.get_current_version()
+                    mod_version_dictionary[ota_module] = v
+
+        pass
+    except Exception:
+        pass
+
+    return mod_version_dictionary
+
+
 def download_and_install_updates_if_available():
     """Connects to WiFi and checks for all modules for updates. This function will always cause a machine reset. """
     try:
@@ -123,16 +146,16 @@ def download_and_install_updates_if_available():
 
 
 def boot():
-    # Check reason for reset - only update if power on reset. For now we only want to do OTA if requested.
-    # try:
-    #     if machine.reset_cause() == machine.PWRON_RESET:
-    #         download_and_install_updates_if_available()  # commented out during development
-    # except Exception as the_exception:
-    #     jotter.get_jotter().jot_exception(the_exception)
-    #     import sys
-    #     sys.print_exception(the_exception)
-    #     pass
-    #     # Log to file
+    # Check reason for reset - only update if power on reset.
+    try:
+        if machine.reset_cause() == machine.PWRON_RESET:
+            download_and_install_updates_if_available()  # commented out during development
+    except Exception as the_exception:
+        jotter.get_jotter().jot_exception(the_exception)
+        import sys
+        sys.print_exception(the_exception)
+        pass
+        # Log to file
 
     # Manual OTA request
     try:
@@ -152,11 +175,12 @@ def boot():
         # Log to file
 
     # Start the main application
-    try:
-        start()
-    finally:
-        # If we return from start() then things have crashed so reset the device.
-        machine.reset()
+    # try:
+    start()
+    # except
+    # If it's a keyboard interrupt then we've connected via REPL so don't restart.
+    # If we return from start() then things have crashed so reset the device.
+    #    machine.reset()
 
 
 def start():
@@ -184,9 +208,27 @@ def start():
         pass
         # Log to file
 
+    # Get installed modules and versions
+    installed_modules = None
+    try:
+        installed_modules = get_installed_module_versions()
+        if installed_modules:
+            print("Installed Modules")
+            for (mod, version) in installed_modules.items():
+                print(str(mod) + " : " + str(version))
+    except Exception as the_exception:
+        jotter.get_jotter().jot_exception(the_exception)
+
+        import sys
+        sys.print_exception(the_exception)
+        pass
+        # Log to file
+
     # Now run the mainloop
     try:
         import mainloop.main.mainloop as ml
+        env_variables = {"installedModules": installed_modules}
+        ml.set_environment_variables(env_variables)
         jotter.get_jotter().jot("start()::run_mainloop()", source_file=__name__)
         ml.run_mainloop()
     except Exception as the_exception:
