@@ -114,6 +114,20 @@ def download_and_install_updates_if_available():
         # Feed the watchdog
         wdt.feed()
 
+        # Power on the 3V3 Regulator?
+        pyb.Pin.board.EN_3V3.on()
+
+        import network
+        sta_if = network.WLAN(network.STA_IF)
+        sta_if.active(False) # disable wifi if currently active - in case of issues from a previous run
+        sta_if.deinit()
+        #sta_if.config(trace=1)
+
+        utime.sleep_ms(1000) # yield and wait for supply to stabilise
+
+        # Feed the watchdog
+        wdt.feed()
+
         # Open Wifi
         if not OTAUpdater.using_network(wifi_cfg['wifi']['ssid'], wifi_cfg['wifi']['password']):
             # Failed to connect
@@ -131,16 +145,23 @@ def download_and_install_updates_if_available():
             print("ota_module=" + ota_module)
             ota_cfg = load_ota_config(ota_module)
             if ota_cfg:
-                o = OTAUpdater(ota_cfg['gitrepo']['url'], ota_module)
+                github_pat = None
+                if wifi_cfg.get('github') and wifi_cfg['github'].get('pat'):
+                    github_pat = wifi_cfg['github']['pat']
+
+                o = OTAUpdater(ota_cfg['gitrepo']['url'], ota_module, github_pat=github_pat)
                 # download_updates_if_available - Checks version numbers and downloads into next/
                 o.download_updates_if_available()
                 # apply_pending_updates_if_available - Moves next/ into main/
                 o.apply_pending_updates_if_available()
 
-    except Exception:
+    except Exception as the_exception:
+        import sys
+        sys.print_exception(the_exception)
         pass
 
     finally:
+        utime.sleep_ms(2000) # pause to let print statements complete
         # Now need to reboot to make use of the updated modules
         machine.reset()
 

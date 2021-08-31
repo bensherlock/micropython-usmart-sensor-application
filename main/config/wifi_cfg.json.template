@@ -1,1 +1,1 @@
-{"wifi": {"ssid": "THE_SSID", "password": "THE_PASSWORD" } }
+{"wifi": {"ssid": "THE_SSID", "password": "THE_PASSWORD" }, "github": {"pat": "THE_PAT"} }
