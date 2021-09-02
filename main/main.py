@@ -114,9 +114,6 @@ def download_and_install_updates_if_available():
         # Feed the watchdog
         wdt.feed()
 
-        # Power on the 3V3 Regulator?
-        pyb.Pin.board.EN_3V3.on()
-
         import network
         sta_if = network.WLAN(network.STA_IF)
         sta_if.active(False) # disable wifi if currently active - in case of issues from a previous run
@@ -168,15 +165,21 @@ def download_and_install_updates_if_available():
 
 def boot():
     # Check reason for reset - only update if power on reset.
-    try:
-        if machine.reset_cause() == machine.PWRON_RESET:
-            download_and_install_updates_if_available()  # commented out during development
-    except Exception as the_exception:
-        jotter.get_jotter().jot_exception(the_exception)
-        import sys
-        sys.print_exception(the_exception)
-        pass
-        # Log to file
+    #try:
+    #    if machine.reset_cause() == machine.PWRON_RESET:
+    #        download_and_install_updates_if_available()  # commented out during development
+    #except Exception as the_exception:
+    #    jotter.get_jotter().jot_exception(the_exception)
+    #    import sys
+    #    sys.print_exception(the_exception)
+    #    pass
+    #    # Log to file
+
+    # 2021-09-02
+    # The update on POR has been disabled for now. Low-battery brownouts on long-term deployed units may well have
+    # resulted in many many POR update events. As the MicroPython firmware pushes new driver firmware to the wifi SoC
+    # everytime active(True) is called (on powerup of the wifi SoC) this may have detrimental effect.
+    # See open issue: https://github.com/micropython/micropython/issues/7738
 
     # Manual OTA request
     try:
