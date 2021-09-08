@@ -163,7 +163,79 @@ def download_and_install_updates_if_available():
         machine.reset()
 
 
+def low_power_pins(disable_3v3=False, disable_leds=False):
+    # from https://github.com/micropython/micropython/issues/4686
+    pins = [
+        # user IO pins
+        'A0', 'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'A9', 'A10', 'A11', 'A12', 'A13', 'A14', 'A15',
+        'B0', 'B1', 'B3', 'B4', 'B5', 'B7', 'B8', 'B9', 'B10', 'B11', 'B12', 'B13',
+        'C0', 'C1', 'C2', 'C3', 'C4', 'C5', 'C6',
+        'D0', 'D3', 'D8', 'D9',
+        'E0', 'E1', 'E12', 'E14', 'E15',
+        'F1', 'F6', 'F7', 'F8', 'F9', 'F10', 'F11', 'F13', 'F14', 'F15',
+        'H2', 'H3', 'H5', 'H6', 'H7', 'H8',
+        'I0', 'I1',
+
+        # internal pins
+        'D1', 'D14', 'D15',
+        'F0', 'F12',
+        'G0', 'G1', 'G2', 'G3', 'G4', 'G5', #'G6',
+        'H4', 'H9', 'H10', 'H11', 'H12', 'H13', 'H14', 'H15',
+        'I2', 'I3',
+    ]
+    pins_led = ['F3', 'F4', 'F5',]
+    pins_sdmmc = ['D6', 'D7', 'G9', 'G10', 'G11', 'G12']
+    pins_wlan = ['D2', 'D4', 'I7', 'I8', 'I9', 'I11']
+    pins_bt = ['D5', 'D10', 'E3', 'E4', 'E5', 'E6', 'G8', 'G13', 'G14', 'G15', 'I4', 'I5', 'I6', 'I10']
+    pins_qspi1 = ['B2', 'B6', 'D11', 'D12', 'D13', 'E2']
+    pins_qspi2 = ['E7', 'E8', 'E9', 'E10', 'E11', 'E13']
+    for p in pins:
+        pyb.Pin(p, pyb.Pin.IN, pyb.Pin.PULL_DOWN)
+    if disable_3v3:
+       pyb.Pin('EN_3V3', pyb.Pin.IN, None)
+    if disable_leds:
+        for p in pins_led:
+            pyb.Pin(p, pyb.Pin.IN, pyb.Pin.PULL_UP)
+
 def boot():
+    # Check battery voltage and if below a set value power off all peripherals and permanently enter deepsleep.
+    # Letting the battery run down and repeat brownout/POR damages the PYBD.
+
+    # Cycle the NM3 power supply on the powermodule
+    try:
+        import pyb
+        import machine
+        from pybd_expansion.main.powermodule import PowerModule
+        powermodule = PowerModule()
+
+
+        # 2 second delay at the start to allow battery voltage at the ADC to stabilise.
+        timeout_start = utime.time()
+        while utime.time() < timeout_start + 2:
+            utime.sleep_ms(100)
+
+
+        vbatt_volts = powermodule.get_vbatt_reading()
+
+        if vbatt_volts < 3.6:
+            # Turn off the USB
+            pyb.usb_mode(None)
+
+            low_power_pins(disable_3v3=True, disable_leds=True)
+
+            powermodule.disable_nm3() # Needs to be driven low in order to pull-down the external resistor.
+
+            while 1:
+                machine.lightsleep() # Enter lightsleep
+                utime.sleep_ms(100)
+
+
+    except Exception as the_exception:
+        import sys
+        sys.print_exception(the_exception)
+        pass
+
+
     # Check reason for reset - only update if power on reset.
     #try:
     #    if machine.reset_cause() == machine.PWRON_RESET:
